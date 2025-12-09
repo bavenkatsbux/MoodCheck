@@ -172,50 +172,46 @@ function App() {
       <div className="glass-panel">
         <p style={{ marginBottom: '1rem', opacity: 0.8 }}>Welcome, {user.displayName}!</p>
         <div className="form-container">
-          <div className="mood-grid">
-            {MOODS.map((m) => (
-              <button
-                key={m.label}
-                type="button"
-                className={`mood-btn ${currentMood === m.emoji ? 'selected' : ''}`}
-                onClick={() => setCurrentMood(m.emoji)}
-                title={m.label}
-              >
-                {m.emoji}
-              </button>
-            ))}
+          <div className="mood-section">
+            <h3 className="section-label">Select Mood</h3>
+            <div className="mood-grid">
+              {MOODS.map((m) => (
+                <button
+                  key={m.label}
+                  type="button"
+                  className={`mood-btn ${currentMood === m.emoji ? 'selected' : ''}`}
+                  onClick={() => setCurrentMood(m.emoji)}
+                  title={m.label}
+                  aria-label={m.label}
+                >
+                  {m.emoji}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <textarea
-            className="note-input"
-            placeholder="How are you feeling right now?"
-            rows={3}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-          />
+          <div className="input-section">
+            <textarea
+              className="note-input"
+              placeholder="How are you feeling right now? (Optional)"
+              rows={3}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
 
-          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              style={{
-                backgroundColor: '#ffd700',
-                color: '#333',
-                padding: '15px 30px',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                border: 'none',
-                borderRadius: '50px',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-                position: 'relative',
-                zIndex: 1000,
-                opacity: isSubmitting || !currentMood ? 0.7 : 1
-              }}
-              disabled={isSubmitting || !currentMood}
-            >
-              {isSubmitting ? 'Saving...' : 'SUBMIT'}
-            </button>
+            <div className="button-container">
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="submit-btn"
+                style={{
+                  opacity: isSubmitting || !currentMood ? 0.7 : 1
+                }}
+                disabled={isSubmitting || !currentMood}
+              >
+                {isSubmitting ? 'Saving...' : 'SUBMIT'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
