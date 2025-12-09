@@ -28,6 +28,7 @@ function App() {
   const [loading, setLoading] = useState(false); // Data loading
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [suggestion, setSuggestion] = useState<string | null>(null);
 
   // Monitor Auth State
   useEffect(() => {
@@ -119,6 +120,17 @@ function App() {
         timestamp: Timestamp.now(),
         uid: user.uid
       });
+
+      // Micro-suggestion Logic
+      let msg = '';
+      if (currentMood === '😔') msg = "Try a 30-sec deep breath. 🌿";
+      else if (currentMood === '😡') msg = "One small win: message a friend. 💭";
+      else if (currentMood === '🙂' || currentMood === '🤩') msg = "Celebrate this moment! 🎉";
+      else msg = "Take a moment to center yourself. ✨";
+
+      setSuggestion(msg);
+      setTimeout(() => setSuggestion(null), 10000); // Clear after 10s
+
       // Reset form
       setCurrentMood(null);
       setNote('');
@@ -301,6 +313,12 @@ function App() {
                 {isSubmitting ? 'Saving...' : 'SUBMIT'}
               </button>
             </div>
+
+            {suggestion && (
+              <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.15)', borderRadius: '12px', borderLeft: '4px solid var(--accent-color)', animation: 'fadeIn 0.5s ease', color: 'white' }}>
+                <p style={{ fontSize: '1rem', fontWeight: 500 }}>{suggestion}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
