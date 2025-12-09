@@ -117,6 +117,12 @@ h1 {
     gap: var(--space-lg);
     align-items: start;
   }
+
+  /* Prevent grid blowout */
+  .mood-section,
+  .input-section {
+    min-width: 0;
+  }
 }
 
 /* --- Mood Grid --- */
@@ -125,6 +131,8 @@ h1 {
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
+  width: 100%;
+  /* Force width to respect container */
 }
 
 .mood-btn {
