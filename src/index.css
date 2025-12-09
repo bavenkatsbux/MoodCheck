@@ -121,9 +121,10 @@ h1 {
 
 /* --- Mood Grid --- */
 .mood-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
 }
 
 .mood-btn {
@@ -131,16 +132,15 @@ h1 {
   border: 2px solid transparent;
   border-radius: 12px;
   font-size: 1.8rem;
-  aspect-ratio: 1;
-  /* Square buttons */
+  width: 50px;
+  /* Fixed width for flex */
+  height: 50px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 44px;
-  /* Touch target size */
-  min-height: 44px;
+  flex-shrink: 0;
 }
 
 .mood-btn:hover {
