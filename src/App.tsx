@@ -199,8 +199,45 @@ function App() {
       count: recent.length
     };
   };
+  // Pattern Detection Logic
+  const getInsights = () => {
+    if (entries.length < 2) return [];
+
+    const insights: string[] = [];
+    const recent = entries.slice(0, 10); // Analyze last 10
+    const values = { '😡': 1, '😔': 2, '😐': 3, '🙂': 4, '🤩': 5 };
+    const numValues = recent.map(e => values[e.mood as keyof typeof values] || 3);
+
+    // 1. Time of Day Analysis
+    const hours = recent.map(e => e.timestamp?.toDate().getHours() || 12);
+    const morning = hours.filter(h => h >= 5 && h < 11).length;
+    const evening = hours.filter(h => h >= 17 && h < 23).length;
+
+    if (morning / recent.length > 0.6) insights.push("Most of your recent check-ins are in the morning. 🌅");
+    if (evening / recent.length > 0.6) insights.push("Most of your recent check-ins are in the evening. 🌙");
+
+    // 2. Improvement (Last 3 vs Previous 3)
+    if (numValues.length >= 6) {
+      const last3 = numValues.slice(0, 3);
+      const prev3 = numValues.slice(3, 6);
+      const avgLast3 = last3.reduce((a, b) => a + b, 0) / 3;
+      const avgPrev3 = prev3.reduce((a, b) => a + b, 0) / 3;
+
+      if (avgLast3 - avgPrev3 >= 0.5) insights.push("Your mood has improved significantly in the last few entries! 🚀");
+    }
+
+    // 3. Tough Sequence (Two sad/angry in a row)
+    if (numValues.length >= 2) {
+      if (numValues[0] <= 2 && numValues[1] <= 2) {
+        insights.push("Two difficult days in a row — be kind to yourself. 💜");
+      }
+    }
+
+    return insights;
+  };
 
   const stats = getStats();
+  const insights = getInsights();
 
   return (
     <div className="container">
@@ -291,6 +328,24 @@ function App() {
           </div>
         </div>
       )}
+
+      {insights.length > 0 && (
+        <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1rem', background: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
+          <h3 style={{ fontSize: '1rem', marginBottom: '0.8rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            💡 Insights
+          </h3>
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {insights.map((insight, index) => (
+              <li key={index} style={{ marginBottom: '0.5rem', fontSize: '0.95rem', opacity: 0.9, display: 'flex', gap: '8px' }}>
+                <span>•</span>
+                <span>{insight}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+
 
       <div className="glass-panel" style={{ padding: '1.5rem' }}>
         <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', opacity: 0.9 }}>Your Recent Entries</h2>
