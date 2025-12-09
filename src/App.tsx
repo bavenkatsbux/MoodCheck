@@ -172,14 +172,21 @@ function App() {
 
   if (!user) {
     return (
-      <div className="container">
-        <h1>MoodCheck</h1>
-        <div className="glass-panel" style={{ textAlign: 'center', padding: '3rem' }}>
-          <p style={{ marginBottom: '2rem', fontSize: '1.2rem' }}>
-            Track your mood privately. Sign in to start.
+      <div className="app-shell">
+        <div className="ios-header">
+          <div>
+            <p className="ios-eyebrow">Welcome</p>
+            <h1 className="ios-title">MoodCheck</h1>
+          </div>
+          <div className="ios-pill">Private & Secure</div>
+        </div>
+
+        <div className="glass-panel ios-card" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
+          <p style={{ marginBottom: '1.5rem', fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
+            Track your mood privately and get gentle nudges inspired by iPhone wellness apps.
           </p>
           <button className="submit-btn" onClick={handleLogin}>
-            Sign in with Google
+            Continue with Google
           </button>
         </div>
       </div>
@@ -277,44 +284,29 @@ function App() {
   const insights = getInsights();
 
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <h1 style={{ margin: 0, fontSize: '1.5rem', textShadow: 'none' }}>MoodCheck</h1>
+    <div className="app-shell">
+      <div className="ios-header">
+        <div>
+          <p className="ios-eyebrow">Welcome back</p>
+          <h1 className="ios-title">MoodCheck</h1>
+        </div>
+        <div className="ios-actions">
           <button
             onClick={toggleTheme}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              padding: '4px',
-              lineHeight: 1
-            }}
+            className="ios-icon-btn"
             title={`Current: ${theme.charAt(0).toUpperCase() + theme.slice(1)} Mode`}
           >
             {theme === 'dark' ? '☀️' : theme === 'light' ? '☕' : '🌙'}
           </button>
+          {user && (
+            <button onClick={handleLogout} className="ios-pill">
+              Sign Out
+            </button>
+          )}
         </div>
-
-        {user && (
-          <button
-            onClick={handleLogout}
-            style={{
-              background: 'var(--input-bg)',
-              border: '1px solid var(--glass-border)',
-              color: 'var(--text-primary)',
-              padding: '0.5rem 1rem',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            Sign Out
-          </button>
-        )}
       </div>
 
-      <div className="glass-panel">
+      <div className="glass-panel ios-card">
         <p style={{ marginBottom: '1rem', opacity: 0.8 }}>Welcome, {user.displayName}!</p>
         <div className="form-container">
           <div className="mood-section">

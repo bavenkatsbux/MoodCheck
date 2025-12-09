@@ -1,55 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=SF+Pro+Rounded:wght@500;600&display=swap');
 
 :root {
   /* Common */
-  --font-family: 'Outfit', sans-serif;
-  --accent-color: #ffd700;
+  --font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --accent-color: #0a84ff;
 
-  /* Dark Theme (Default) */
-  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --input-bg: rgba(255, 255, 255, 0.15);
-  --card-bg: rgba(0, 0, 0, 0.2);
-  --btn-hover: rgba(255, 255, 255, 0.25);
+  /* Dark Theme (Default - iOS Depth) */
+  --bg-gradient: radial-gradient(circle at 20% 20%, #dfe8ff 0%, #f7f7ff 30%, #e0ecff 60%, #fdf9ff 100%);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 20px 35px rgba(55, 55, 95, 0.12);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --btn-hover: rgba(10, 132, 255, 0.12);
 
   /* Spacing Variables */
   --space-sm: 0.75rem;
   --space-md: 1.5rem;
   --space-lg: 2.5rem;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
 }
 
 [data-theme="light"] {
-  /* Light Theme */
-  --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-  --glass-bg: rgba(255, 255, 255, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --glass-shadow: 0 8px 32px 0 rgba(100, 100, 100, 0.1);
-  --text-primary: #1e293b;
+  /* Neutral Light Theme */
+  --bg-gradient: radial-gradient(circle at 30% 10%, #f8fbff 0%, #f2f5ff 45%, #e6efff 100%);
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(10, 132, 255, 0.08);
+  --glass-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  --text-primary: #0f172a;
   --text-secondary: #475569;
-  --input-bg: rgba(0, 0, 0, 0.05);
-  --card-bg: rgba(255, 255, 255, 0.5);
-  --btn-hover: rgba(0, 0, 0, 0.05);
-  --accent-color: #fbbf24;
+  --input-bg: rgba(255, 255, 255, 1);
+  --card-bg: rgba(255, 255, 255, 1);
+  --btn-hover: rgba(10, 132, 255, 0.12);
+  --accent-color: #0a84ff;
 }
 
 [data-theme="starbucks"] {
   /* Starbucks Theme */
   --bg-gradient: linear-gradient(135deg, #f1f8f6 0%, #d4e9e2 100%);
-  /* Light Greenish/White */
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(0, 112, 74, 0.2);
-  --glass-shadow: 0 8px 24px rgba(0, 112, 74, 0.15);
+  --glass-bg: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(0, 112, 74, 0.16);
+  --glass-shadow: 0 20px 45px rgba(0, 112, 74, 0.12);
   --text-primary: #1e3932;
-  /* Starbucks Dark Green/Black */
-  --text-secondary: #00704a;
-  /* Starbucks Green */
+  --text-secondary: #2b5d52;
   --input-bg: #ffffff;
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --btn-hover: rgba(0, 112, 74, 0.1);
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --btn-hover: rgba(0, 112, 74, 0.12);
   --accent-color: #00704a;
 }
 
@@ -61,9 +60,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  /* Better for scrolling on mobile */
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  padding-top: calc(1.5rem + env(safe-area-inset-top));
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom));
   overflow-x: hidden;
 }
 
@@ -71,9 +69,17 @@ body {
 #root {
   width: 100%;
   max-width: 100%;
-  /* Default mobile */
   padding: 0 var(--space-sm);
   margin: 0 auto;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
 @media (min-width: 640px) {
@@ -81,35 +87,99 @@ body {
     padding: 0 var(--space-md);
     max-width: 640px;
   }
+
+  .app-shell {
+    max-width: 720px;
+  }
 }
 
 @media (min-width: 1024px) {
   #root {
     max-width: 900px;
-    /* Wider for side-by-side layout */
   }
 }
 
-h1 {
-  font-size: clamp(2rem, 5vw, 3rem);
-  /* Responsive Type */
+/* --- Navigation --- */
+.ios-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.ios-title {
+  margin: 0;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
   font-weight: 700;
-  text-align: center;
-  margin-bottom: var(--space-md);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.02em;
+}
+
+.ios-eyebrow {
+  margin: 0;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+}
+
+.ios-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ios-pill {
+  background: #f2f4f7;
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 8px 14px rgba(15, 23, 42, 0.08);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.ios-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: white;
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.1);
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ios-icon-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(15, 23, 42, 0.14);
 }
 
 /* --- Glass Panel --- */
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 20px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   padding: var(--space-md);
-  margin-bottom: var(--space-md);
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 40px rgba(15, 23, 42, 0.12);
+}
+
+.ios-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
 }
 
 @media (min-width: 640px) {
@@ -160,37 +230,36 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  /* Force width to respect container */
 }
 
 .mood-btn {
-  background: var(--input-bg);
-  border: 2px solid transparent;
-  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(243, 244, 246, 0.9) 100%);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
   font-size: 1.8rem;
-  width: 50px;
-  /* Fixed width for flex */
-  height: 50px;
+  width: 56px;
+  height: 56px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
+  box-shadow: 0 12px 20px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .mood-btn:hover {
   background: var(--btn-hover);
-  transform: scale(1.05);
+  transform: translateY(-1px) scale(1.02);
 }
 
 .mood-btn.selected {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: var(--accent-color);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-  transform: scale(1.1);
+  background: linear-gradient(180deg, rgba(10, 132, 255, 0.12) 0%, rgba(10, 132, 255, 0.08) 100%);
+  border-color: rgba(10, 132, 255, 0.35);
+  box-shadow: 0 12px 24px rgba(10, 132, 255, 0.2);
+  transform: translateY(-1px) scale(1.06);
 }
 
 /* --- Input Section --- */
@@ -202,16 +271,17 @@ h1 {
 
 .note-input {
   width: 100%;
-  padding: 1rem;
+  padding: 1rem 1.1rem;
   background: var(--input-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 18px;
   color: var(--text-primary);
   font-family: var(--font-family);
   font-size: 1rem;
   outline: none;
   resize: vertical;
-  min-height: 100px;
+  min-height: 110px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .note-input::placeholder {
@@ -219,37 +289,34 @@ h1 {
 }
 
 .note-input:focus {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(10, 132, 255, 0.3);
+  box-shadow: 0 12px 24px rgba(10, 132, 255, 0.1);
 }
 
 /* --- Submit Button --- */
 .submit-btn {
   width: 100%;
   padding: 1rem;
-  background: var(--accent-color);
-  /* Yellow */
-  color: #333;
+  background: linear-gradient(90deg, var(--accent-color) 0%, #4cc1ff 100%);
+  color: #fff;
   border: none;
-  border-radius: 50px;
-  /* Pill shape */
-  font-size: 1.1rem;
+  border-radius: var(--radius-pill);
+  font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s ease;
+  letter-spacing: 0.02em;
+  box-shadow: 0 12px 25px rgba(10, 132, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 [data-theme="starbucks"] .submit-btn {
-  color: white;
+  background: linear-gradient(90deg, #00704a 0%, #00a36c 100%);
+  color: #fff;
 }
 
 .submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  background: #ffe033;
+  box-shadow: 0 18px 30px rgba(10, 132, 255, 0.35);
 }
 
 .submit-btn:disabled {
@@ -268,12 +335,14 @@ h1 {
 
 .entry-card {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: 18px;
   padding: 1rem;
   display: flex;
   align-items: flex-start;
   gap: 1rem;
   animation: fadeIn 0.5s ease-out;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 16px 28px rgba(15, 23, 42, 0.08);
 }
 
 @keyframes fadeIn {
@@ -290,16 +359,16 @@ h1 {
 
 .entry-mood {
   font-size: 1.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.5rem;
-  border-radius: 50%;
-  min-width: 50px;
-  height: 50px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(243, 244, 246, 0.9) 100%);
+  padding: 0.6rem;
+  border-radius: 16px;
+  min-width: 52px;
+  height: 52px;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  /* Prevent shrinking */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 10px 18px rgba(15, 23, 42, 0.08);
 }
 
 .entry-content {
