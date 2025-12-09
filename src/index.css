@@ -34,13 +34,23 @@
   --card-bg: rgba(255, 255, 255, 0.5);
   --btn-hover: rgba(0, 0, 0, 0.05);
   --accent-color: #fbbf24;
-  /* Slightly darker yellow for light mode */
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+[data-theme="starbucks"] {
+  /* Starbucks Theme */
+  --bg-gradient: linear-gradient(135deg, #f1f8f6 0%, #d4e9e2 100%);
+  /* Light Greenish/White */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 112, 74, 0.2);
+  --glass-shadow: 0 8px 24px rgba(0, 112, 74, 0.15);
+  --text-primary: #1e3932;
+  /* Starbucks Dark Green/Black */
+  --text-secondary: #00704a;
+  /* Starbucks Green */
+  --input-bg: #ffffff;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --btn-hover: rgba(0, 112, 74, 0.1);
+  --accent-color: #00704a;
 }
 
 body {
@@ -230,6 +240,10 @@ h1 {
   text-transform: uppercase;
   letter-spacing: 1px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="starbucks"] .submit-btn {
+  color: white;
 }
 
 .submit-btn:hover {

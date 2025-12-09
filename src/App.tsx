@@ -29,7 +29,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestion, setSuggestion] = useState<string | null>(null);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light' | 'starbucks'>('dark');
 
   // Theme Toggle Effect
   useEffect(() => {
@@ -37,7 +37,11 @@ function App() {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    setTheme(prev => {
+      if (prev === 'dark') return 'light';
+      if (prev === 'light') return 'starbucks';
+      return 'dark';
+    });
   };
 
   // Monitor Auth State
@@ -287,9 +291,9 @@ function App() {
               padding: '4px',
               lineHeight: 1
             }}
-            title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            title={`Current: ${theme.charAt(0).toUpperCase() + theme.slice(1)} Mode`}
           >
-            {theme === 'dark' ? '☀️' : '🌙'}
+            {theme === 'dark' ? '☀️' : theme === 'light' ? '☕' : '🌙'}
           </button>
         </div>
 
