@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { db, auth, googleProvider } from './firebase';
 import { collection, addDoc, query, onSnapshot, Timestamp, where, deleteDoc, doc } from 'firebase/firestore';
 import { signInWithPopup, signOut, onAuthStateChanged, type User } from 'firebase/auth';
+import { Header } from './components/Header';
+import { StatsCard } from './components/StatsCard';
+import { EntryList } from './components/EntryList';
+import { MoodForm } from './components/MoodForm';
+import { Insights } from './components/Insights';
 
 interface MoodEntry {
   id: string;
@@ -25,13 +30,13 @@ function App() {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
   const [note, setNote] = useState('');
   const [entries, setEntries] = useState<MoodEntry[]>([]);
-  const [loading, setLoading] = useState(false); // Data loading
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestion, setSuggestion] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light' | 'starbucks'>('dark');
 
-  // Theme Toggle Effect
+  // Theme Toggle
   useEffect(() => {
     document.body.setAttribute('data-theme', theme);
   }, [theme]);
@@ -44,7 +49,7 @@ function App() {
     });
   };
 
-  // Monitor Auth State
+  // Auth State
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -53,7 +58,7 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // Monitor Data (only when user is logged in)
+  // Data Sync
   useEffect(() => {
     if (!user) {
       setEntries([]);
@@ -64,7 +69,6 @@ function App() {
     const q = query(
       collection(db, 'moods'),
       where('uid', '==', user.uid)
-      // orderBy and limit removed for debugging
     );
 
     const unsubscribe = onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
@@ -73,7 +77,7 @@ function App() {
         ...doc.data()
       })) as MoodEntry[];
 
-      // Client-side sort for debugging
+      // Client-side sort
       data.sort((a, b) => {
         const ta = a.timestamp?.toMillis() || 0;
         const tb = b.timestamp?.toMillis() || 0;
@@ -110,7 +114,6 @@ function App() {
     }
   };
 
-
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this entry?')) return;
     try {
@@ -119,17 +122,6 @@ function App() {
       console.error("Error deleting:", e);
       alert("Failed to delete: " + e.message);
     }
-  };
-
-
-  const formatDate = (timestamp: Timestamp | null) => {
-    if (!timestamp) return 'Just now';
-    return timestamp.toDate().toLocaleString([], {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
   const handleSubmit = async () => {
@@ -153,9 +145,8 @@ function App() {
       else msg = "Take a moment to center yourself. ✨";
 
       setSuggestion(msg);
-      setTimeout(() => setSuggestion(null), 10000); // Clear after 10s
+      setTimeout(() => setSuggestion(null), 10000);
 
-      // Reset form
       setCurrentMood(null);
       setNote('');
     } catch (e: any) {
@@ -166,9 +157,84 @@ function App() {
     }
   };
 
-  if (authLoading) {
-    return <div className="loading-spinner">Initializing MoodCheck...</div>;
-  }
+  // Stats Logic
+  const getStats = () => {
+    if (entries.length === 0) return null;
+
+    const recent = entries.slice(0, 7);
+    const values = { '😡': 1, '😔': 2, '😐': 3, '🙂': 4, '🤩': 5 };
+    const numValues = recent.map(e => values[e.mood as keyof typeof values] || 3);
+
+    const sum = numValues.reduce((a, b) => a + b, 0);
+    const avg = sum / numValues.length;
+    const min = Math.min(...numValues);
+    const max = Math.max(...numValues);
+    const reverseMap = { 1: '😡', 2: '😔', 3: '😐', 4: '🙂', 5: '🤩' };
+
+    let trend = '➡️';
+    if (numValues.length >= 2) {
+      const splitIndex = Math.min(3, Math.ceil(numValues.length / 2));
+      const recentHalf = numValues.slice(0, splitIndex);
+      const olderHalf = numValues.slice(splitIndex);
+      const recentAvg = recentHalf.reduce((a, b) => a + b, 0) / recentHalf.length;
+      const olderAvg = olderHalf.length > 0 ? olderHalf.reduce((a, b) => a + b, 0) / olderHalf.length : recentAvg;
+      const diff = recentAvg - olderAvg;
+      if (diff >= 0.2) trend = '↗️';
+      else if (diff <= -0.2) trend = '↘️';
+    }
+
+    let avgColor = '#ffffff';
+    if (avg >= 4) avgColor = '#4ade80';
+    else if (avg >= 2.5) avgColor = '#facc15';
+    else avgColor = '#f87171';
+
+    return {
+      avg: avg.toFixed(1),
+      avgColor,
+      min: reverseMap[min as keyof typeof reverseMap],
+      max: reverseMap[max as keyof typeof reverseMap],
+      trend,
+      count: recent.length
+    };
+  };
+
+  // Insights Logic
+  const getInsights = () => {
+    if (entries.length < 2) return [];
+
+    const insights: string[] = [];
+    const recent = entries.slice(0, 10);
+    const values = { '😡': 1, '😔': 2, '😐': 3, '🙂': 4, '🤩': 5 };
+    const numValues = recent.map(e => values[e.mood as keyof typeof values] || 3);
+
+    const hours = recent.map(e => e.timestamp?.toDate().getHours() || 12);
+    const morning = hours.filter(h => h >= 5 && h < 11).length;
+    const evening = hours.filter(h => h >= 17 && h < 23).length;
+
+    if (morning / recent.length > 0.6) insights.push("Most of your recent check-ins are in the morning. 🌅");
+    if (evening / recent.length > 0.6) insights.push("Most of your recent check-ins are in the evening. 🌙");
+
+    if (numValues.length >= 6) {
+      const last3 = numValues.slice(0, 3);
+      const prev3 = numValues.slice(3, 6);
+      const avgLast3 = last3.reduce((a, b) => a + b, 0) / 3;
+      const avgPrev3 = prev3.reduce((a, b) => a + b, 0) / 3;
+      if (avgLast3 - avgPrev3 >= 0.5) insights.push("Your mood has improved significantly in the last few entries! 🚀");
+    }
+
+    if (numValues.length >= 2) {
+      if (numValues[0] <= 2 && numValues[1] <= 2) {
+        insights.push("Two difficult days in a row — be kind to yourself. 💜");
+      }
+    }
+
+    return insights;
+  };
+
+  const stats = getStats();
+  const insights = getInsights();
+
+  if (authLoading) return <div className="loading-spinner">Initializing MoodCheck...</div>;
 
   if (!user) {
     return (
@@ -186,274 +252,36 @@ function App() {
     );
   }
 
-  // Stats Logic
-  const getStats = () => {
-    if (entries.length === 0) return null;
-
-    const recent = entries.slice(0, 7);
-    const values = { '😡': 1, '😔': 2, '😐': 3, '🙂': 4, '🤩': 5 };
-    const numValues = recent.map(e => values[e.mood as keyof typeof values] || 3);
-
-    // Average
-    const sum = numValues.reduce((a, b) => a + b, 0);
-    const avg = sum / numValues.length;
-
-    // Min/Max
-    const min = Math.min(...numValues);
-    const max = Math.max(...numValues);
-
-    // Reverse Map for Display
-    const reverseMap = { 1: '😡', 2: '😔', 3: '😐', 4: '🙂', 5: '🤩' };
-
-    // Trend (Last 3 vs Previous 4)
-    let trend = '➡️'; // Flat
-    if (numValues.length >= 2) {
-      const splitIndex = Math.min(3, Math.ceil(numValues.length / 2));
-      const recentHalf = numValues.slice(0, splitIndex);
-      const olderHalf = numValues.slice(splitIndex);
-
-      const recentAvg = recentHalf.reduce((a, b) => a + b, 0) / recentHalf.length;
-      const olderAvg = olderHalf.length > 0 ? olderHalf.reduce((a, b) => a + b, 0) / olderHalf.length : recentAvg;
-
-      const diff = recentAvg - olderAvg;
-      if (diff >= 0.2) trend = '↗️';
-      else if (diff <= -0.2) trend = '↘️';
-    }
-
-    // Color logic
-    let avgColor = '#ffffff'; // white default
-    if (avg >= 4) avgColor = '#4ade80'; // Green
-    else if (avg >= 2.5) avgColor = '#facc15'; // Yellow
-    else avgColor = '#f87171'; // Red
-
-    return {
-      avg: avg.toFixed(1),
-      avgColor,
-      min: reverseMap[min as keyof typeof reverseMap],
-      max: reverseMap[max as keyof typeof reverseMap],
-      trend,
-      count: recent.length
-    };
-  };
-
-  // Pattern Detection Logic
-  const getInsights = () => {
-    if (entries.length < 2) return [];
-
-    const insights: string[] = [];
-    const recent = entries.slice(0, 10); // Analyze last 10
-    const values = { '😡': 1, '😔': 2, '😐': 3, '🙂': 4, '🤩': 5 };
-    const numValues = recent.map(e => values[e.mood as keyof typeof values] || 3);
-
-    // 1. Time of Day Analysis
-    const hours = recent.map(e => e.timestamp?.toDate().getHours() || 12);
-    const morning = hours.filter(h => h >= 5 && h < 11).length;
-    const evening = hours.filter(h => h >= 17 && h < 23).length;
-
-    if (morning / recent.length > 0.6) insights.push("Most of your recent check-ins are in the morning. 🌅");
-    if (evening / recent.length > 0.6) insights.push("Most of your recent check-ins are in the evening. 🌙");
-
-    // 2. Improvement (Last 3 vs Previous 3)
-    if (numValues.length >= 6) {
-      const last3 = numValues.slice(0, 3);
-      const prev3 = numValues.slice(3, 6);
-      const avgLast3 = last3.reduce((a, b) => a + b, 0) / 3;
-      const avgPrev3 = prev3.reduce((a, b) => a + b, 0) / 3;
-
-      if (avgLast3 - avgPrev3 >= 0.5) insights.push("Your mood has improved significantly in the last few entries! 🚀");
-    }
-
-    // 3. Tough Sequence (Two sad/angry in a row)
-    if (numValues.length >= 2) {
-      if (numValues[0] <= 2 && numValues[1] <= 2) {
-        insights.push("Two difficult days in a row — be kind to yourself. 💜");
-      }
-    }
-
-    return insights;
-  };
-
-  const stats = getStats();
-  const insights = getInsights();
-
   return (
     <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <h1 style={{ margin: 0, fontSize: '1.5rem', textShadow: 'none' }}>MoodCheck</h1>
-          <button
-            onClick={toggleTheme}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              padding: '4px',
-              lineHeight: 1
-            }}
-            title={`Current: ${theme.charAt(0).toUpperCase() + theme.slice(1)} Mode`}
-          >
-            {theme === 'dark' ? '☀️' : theme === 'light' ? '☕' : '🌙'}
-          </button>
-        </div>
+      <Header
+        user={user}
+        handleLogout={handleLogout}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
 
-        {user && (
-          <button
-            onClick={handleLogout}
-            style={{
-              background: 'var(--input-bg)',
-              border: '1px solid var(--glass-border)',
-              color: 'var(--text-primary)',
-              padding: '0.5rem 1rem',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            Sign Out
-          </button>
-        )}
-      </div>
+      <MoodForm
+        moods={MOODS}
+        currentMood={currentMood}
+        setCurrentMood={setCurrentMood}
+        note={note}
+        setNote={setNote}
+        handleSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+        suggestion={suggestion}
+        userDisplayName={user.displayName}
+      />
 
-      <div className="glass-panel">
-        <p style={{ marginBottom: '1rem', opacity: 0.8 }}>Welcome, {user.displayName}!</p>
-        <div className="form-container">
-          <div className="mood-section">
-            <h3 className="section-label">Select Mood</h3>
-            <div className="mood-grid">
-              {MOODS.map((m) => (
-                <button
-                  key={m.label}
-                  type="button"
-                  className={`mood-btn ${currentMood === m.emoji ? 'selected' : ''}`}
-                  onClick={() => setCurrentMood(m.emoji)}
-                  title={m.label}
-                  aria-label={m.label}
-                >
-                  {m.emoji}
-                </button>
-              ))}
-            </div>
-          </div>
+      <StatsCard stats={stats} />
+      <Insights insights={insights} />
 
-          <div className="input-section">
-            <textarea
-              className="note-input"
-              placeholder="How are you feeling right now? (Optional)"
-              rows={3}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-
-            <div className="button-container">
-              <button
-                type="button"
-                onClick={handleSubmit}
-                className="submit-btn"
-                style={{
-                  opacity: isSubmitting || !currentMood ? 0.7 : 1
-                }}
-                disabled={isSubmitting || !currentMood}
-              >
-                {isSubmitting ? 'Saving...' : 'SUBMIT'}
-              </button>
-            </div>
-
-            {suggestion && (
-              <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--glass-bg)', borderRadius: '12px', borderLeft: '4px solid var(--accent-color)', animation: 'fadeIn 0.5s ease', color: 'var(--text-primary)' }}>
-                <p style={{ fontSize: '1rem', fontWeight: 500 }}>{suggestion}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {stats && (
-        <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1rem', background: 'rgba(255,215,0, 0.15)', borderColor: 'rgba(255,215,0,0.3)' }}>
-          <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '1px' }}>Weekly Trend (Last {stats.count})</h3>
-          <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Average</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: stats.avgColor, textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>{stats.avg}</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Best</div>
-              <div style={{ fontSize: '1.5rem' }}>{stats.max}</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Worst</div>
-              <div style={{ fontSize: '1.5rem' }}>{stats.min}</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Trend</div>
-              <div style={{ fontSize: '1.5rem' }}>{stats.trend}</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {insights.length > 0 && (
-        <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1rem', background: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
-          <h3 style={{ fontSize: '1rem', marginBottom: '0.8rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            💡 Insights
-          </h3>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {insights.map((insight, index) => (
-              <li key={index} style={{ marginBottom: '0.5rem', fontSize: '0.95rem', opacity: 0.9, display: 'flex', gap: '8px' }}>
-                <span>•</span>
-                <span>{insight}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="glass-panel" style={{ padding: '1.5rem' }}>
-        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', opacity: 0.9 }}>Your Recent Entries</h2>
-
-        {error && (
-          <div style={{ background: 'rgba(255, 0, 0, 0.2)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', border: '1px solid rgba(255,0,0,0.5)' }}>
-            Error loading data: {error}
-            {error.includes('index') && <p style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>Please check the browser console to create the required index.</p>}
-          </div>
-        )}
-
-        {loading ? (
-          <div className="loading-spinner">Loading history...</div>
-        ) : entries.length === 0 ? (
-          <div className="loading-spinner">No entries yet. Start tracking!</div>
-        ) : (
-          <div className="entries-list">
-            {entries.map((entry) => (
-              <div key={entry.id} className="entry-card" style={{ position: 'relative' }}>
-                <div className="entry-mood">{entry.mood}</div>
-                <div className="entry-content">
-                  <span className="entry-date">{formatDate(entry.timestamp)}</span>
-                  <p className="entry-text">{entry.note}</p>
-                </div>
-                <button
-                  onClick={() => handleDelete(entry.id)}
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-secondary)',
-                    fontSize: '1.2rem',
-                    cursor: 'pointer',
-                    padding: '4px'
-                  }}
-                  title="Delete Entry"
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#ff6b6b'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
-                >
-                  &times;
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <EntryList
+        entries={entries}
+        loading={loading}
+        error={error}
+        handleDelete={handleDelete}
+      />
     </div>
   );
 }
