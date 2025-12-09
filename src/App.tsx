@@ -150,6 +150,58 @@ function App() {
     );
   }
 
+  // Stats Logic
+  const getStats = () => {
+    if (entries.length === 0) return null;
+
+    const recent = entries.slice(0, 7);
+    const values = { '😡': 1, '😔': 2, '😐': 3, '🙂': 4, '🤩': 5 };
+    const numValues = recent.map(e => values[e.mood as keyof typeof values] || 3);
+
+    // Average
+    const sum = numValues.reduce((a, b) => a + b, 0);
+    const avg = sum / numValues.length;
+
+    // Min/Max
+    const min = Math.min(...numValues);
+    const max = Math.max(...numValues);
+
+    // Reverse Map for Display
+    const reverseMap = { 1: '😡', 2: '😔', 3: '😐', 4: '🙂', 5: '🤩' };
+
+    // Trend (Last 3 vs Previous 4)
+    let trend = '➡️'; // Flat
+    if (numValues.length >= 2) {
+      const splitIndex = Math.min(3, Math.ceil(numValues.length / 2));
+      const recentHalf = numValues.slice(0, splitIndex);
+      const olderHalf = numValues.slice(splitIndex);
+
+      const recentAvg = recentHalf.reduce((a, b) => a + b, 0) / recentHalf.length;
+      const olderAvg = olderHalf.length > 0 ? olderHalf.reduce((a, b) => a + b, 0) / olderHalf.length : recentAvg;
+
+      const diff = recentAvg - olderAvg;
+      if (diff >= 0.2) trend = '↗️';
+      else if (diff <= -0.2) trend = '↘️';
+    }
+
+    // Color logic
+    let avgColor = '#ffffff'; // white default
+    if (avg >= 4) avgColor = '#4ade80'; // Green
+    else if (avg >= 2.5) avgColor = '#facc15'; // Yellow
+    else avgColor = '#f87171'; // Red
+
+    return {
+      avg: avg.toFixed(1),
+      avgColor,
+      min: reverseMap[min as keyof typeof reverseMap],
+      max: reverseMap[max as keyof typeof reverseMap],
+      trend,
+      count: recent.length
+    };
+  };
+
+  const stats = getStats();
+
   return (
     <div className="container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -215,6 +267,30 @@ function App() {
           </div>
         </div>
       </div>
+
+      {stats && (
+        <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1rem', background: 'rgba(255,215,0, 0.15)', borderColor: 'rgba(255,215,0,0.3)' }}>
+          <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '1px' }}>Weekly Trend (Last {stats.count})</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Average</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: stats.avgColor, textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>{stats.avg}</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Best</div>
+              <div style={{ fontSize: '1.5rem' }}>{stats.max}</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Worst</div>
+              <div style={{ fontSize: '1.5rem' }}>{stats.min}</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Trend</div>
+              <div style={{ fontSize: '1.5rem' }}>{stats.trend}</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="glass-panel" style={{ padding: '1.5rem' }}>
         <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', opacity: 0.9 }}>Your Recent Entries</h2>
