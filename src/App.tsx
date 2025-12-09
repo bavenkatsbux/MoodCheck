@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db, auth, googleProvider } from './firebase';
-import { collection, addDoc, query, onSnapshot, Timestamp, where } from 'firebase/firestore';
+import { collection, addDoc, query, onSnapshot, Timestamp, where, deleteDoc, doc } from 'firebase/firestore';
 import { signInWithPopup, signOut, onAuthStateChanged, type User } from 'firebase/auth';
 
 interface MoodEntry {
@@ -96,6 +96,16 @@ function App() {
     }
   };
 
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this entry?')) return;
+    try {
+      await deleteDoc(doc(db, 'moods', id));
+    } catch (e: any) {
+      console.error("Error deleting:", e);
+      alert("Failed to delete: " + e.message);
+    }
+  };
 
 
   const formatDate = (timestamp: Timestamp | null) => {
@@ -211,6 +221,7 @@ function App() {
       count: recent.length
     };
   };
+
   // Pattern Detection Logic
   const getInsights = () => {
     if (entries.length < 2) return [];
@@ -363,8 +374,6 @@ function App() {
         </div>
       )}
 
-
-
       <div className="glass-panel" style={{ padding: '1.5rem' }}>
         <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', opacity: 0.9 }}>Your Recent Entries</h2>
 
@@ -382,12 +391,31 @@ function App() {
         ) : (
           <div className="entries-list">
             {entries.map((entry) => (
-              <div key={entry.id} className="entry-card">
+              <div key={entry.id} className="entry-card" style={{ position: 'relative' }}>
                 <div className="entry-mood">{entry.mood}</div>
                 <div className="entry-content">
                   <span className="entry-date">{formatDate(entry.timestamp)}</span>
                   <p className="entry-text">{entry.note}</p>
                 </div>
+                <button
+                  onClick={() => handleDelete(entry.id)}
+                  style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    background: 'none',
+                    border: 'none',
+                    color: 'rgba(255,255,255,0.4)',
+                    fontSize: '1.2rem',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                  title="Delete Entry"
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#ff6b6b'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                >
+                  &times;
+                </button>
               </div>
             ))}
           </div>
