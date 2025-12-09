@@ -29,6 +29,16 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestion, setSuggestion] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  // Theme Toggle Effect
+  useEffect(() => {
+    document.body.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   // Monitor Auth State
   useEffect(() => {
@@ -265,20 +275,39 @@ function App() {
   return (
     <div className="container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h1>MoodCheck</h1>
-        <button
-          onClick={handleLogout}
-          style={{
-            background: 'rgba(255,255,255,0.2)',
-            border: 'none',
-            color: 'white',
-            padding: '0.5rem 1rem',
-            borderRadius: '8px',
-            cursor: 'pointer'
-          }}
-        >
-          Sign Out
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <h1 style={{ margin: 0, fontSize: '1.5rem', textShadow: 'none' }}>MoodCheck</h1>
+          <button
+            onClick={toggleTheme}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              padding: '4px',
+              lineHeight: 1
+            }}
+            title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        </div>
+
+        {user && (
+          <button
+            onClick={handleLogout}
+            style={{
+              background: 'var(--input-bg)',
+              border: '1px solid var(--glass-border)',
+              color: 'var(--text-primary)',
+              padding: '0.5rem 1rem',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            Sign Out
+          </button>
+        )}
       </div>
 
       <div className="glass-panel">
@@ -326,7 +355,7 @@ function App() {
             </div>
 
             {suggestion && (
-              <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.15)', borderRadius: '12px', borderLeft: '4px solid var(--accent-color)', animation: 'fadeIn 0.5s ease', color: 'white' }}>
+              <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--glass-bg)', borderRadius: '12px', borderLeft: '4px solid var(--accent-color)', animation: 'fadeIn 0.5s ease', color: 'var(--text-primary)' }}>
                 <p style={{ fontSize: '1rem', fontWeight: 500 }}>{suggestion}</p>
               </div>
             )}
@@ -405,14 +434,14 @@ function App() {
                     right: '10px',
                     background: 'none',
                     border: 'none',
-                    color: 'rgba(255,255,255,0.4)',
+                    color: 'var(--text-secondary)',
                     fontSize: '1.2rem',
                     cursor: 'pointer',
                     padding: '4px'
                   }}
                   title="Delete Entry"
                   onMouseEnter={(e) => e.currentTarget.style.color = '#ff6b6b'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
                 >
                   &times;
                 </button>

@@ -1,20 +1,40 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
+  /* Common */
   --font-family: 'Outfit', sans-serif;
+  --accent-color: #ffd700;
+
+  /* Dark Theme (Default) */
   --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --glass-bg: rgba(255, 255, 255, 0.1);
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.8);
-  --accent-color: #ffd700;
   --input-bg: rgba(255, 255, 255, 0.15);
+  --card-bg: rgba(0, 0, 0, 0.2);
+  --btn-hover: rgba(255, 255, 255, 0.25);
 
   /* Spacing Variables */
   --space-sm: 0.75rem;
   --space-md: 1.5rem;
   --space-lg: 2.5rem;
+}
+
+[data-theme="light"] {
+  /* Light Theme */
+  --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 8px 32px 0 rgba(100, 100, 100, 0.1);
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --input-bg: rgba(0, 0, 0, 0.05);
+  --card-bg: rgba(255, 255, 255, 0.5);
+  --btn-hover: rgba(0, 0, 0, 0.05);
+  --accent-color: #fbbf24;
+  /* Slightly darker yellow for light mode */
 }
 
 * {
@@ -152,7 +172,7 @@ h1 {
 }
 
 .mood-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--btn-hover);
   transform: scale(1.05);
 }
 
@@ -176,7 +196,7 @@ h1 {
   background: var(--input-bg);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
-  color: white;
+  color: var(--text-primary);
   font-family: var(--font-family);
   font-size: 1rem;
   outline: none;
@@ -185,7 +205,7 @@ h1 {
 }
 
 .note-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
 }
 
 .note-input:focus {
@@ -233,7 +253,7 @@ h1 {
 }
 
 .entry-card {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 1rem;
   display: flex;
